@@ -13,10 +13,13 @@ class Screen extends StatefulWidget {
 }
 
 class _ScreenState extends State<Screen> {
-  int noCount = 0;
+  Map<Permission, int> rejectionCounts = {};
 
   void _showPermissionDialog(
       String permissionName, Function onGranted, Function onDenied) {
+    var permission = _getPermissionType(permissionName);
+    var count = rejectionCounts[permission] ?? 0;
+
     showDialog(
       context: context,
       builder: (BuildContext context) => AlertDialog(
@@ -26,11 +29,11 @@ class _ScreenState extends State<Screen> {
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              noCount++;
-              if (noCount >= 3) {
-                noCount = 0;
+              if (count >= 2) {
+                rejectionCounts[permission] = 0;
                 _showSettingsDialog(); // Show settings dialog for permanent denial
               } else {
+                rejectionCounts[permission] = count + 1;
                 onDenied();
               }
             },
@@ -39,12 +42,13 @@ class _ScreenState extends State<Screen> {
           TextButton(
             onPressed: () async {
               Navigator.of(context).pop();
-              var status = await Permission.camera.request();
+              var status = await permission.request();
               if (status == PermissionStatus.granted) {
                 onGranted();
               } else if (status == PermissionStatus.permanentlyDenied) {
                 _showSettingsDialog(); // Show settings dialog for permanent denial
               } else {
+                rejectionCounts[permission] = count + 1;
                 onDenied();
               }
             },
@@ -75,6 +79,19 @@ class _ScreenState extends State<Screen> {
         ],
       ),
     );
+  }
+
+  Permission _getPermissionType(String permissionName) {
+    switch (permissionName) {
+      case "contact":
+        return Permission.contacts;
+      case "camera":
+        return Permission.camera;
+      case "location":
+        return Permission.location;
+      default:
+        throw ArgumentError("Invalid permission name: $permissionName");
+    }
   }
 
   void contact() async {
