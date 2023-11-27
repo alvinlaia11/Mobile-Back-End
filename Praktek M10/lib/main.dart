@@ -39,7 +39,7 @@ class _ScreenState extends State<Screen> {
           TextButton(
             onPressed: () async {
               Navigator.of(context).pop();
-              var status = await Permission.contacts.request();
+              var status = await Permission.camera.request();
               if (status == PermissionStatus.granted) {
                 onGranted();
               } else if (status == PermissionStatus.permanentlyDenied) {
