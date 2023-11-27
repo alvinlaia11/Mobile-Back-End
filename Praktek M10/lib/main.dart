@@ -1,43 +1,102 @@
-import 'package:basic/components/screen.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 
-void main() {
-  runApp(const MyApp());
+import 'contact.dart';
+
+class Screen extends StatefulWidget {
+  const Screen({super.key});
+
+  @override
+  State<Screen> createState() => _ScreenState();
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class _ScreenState extends State<Screen> {
+  int noCount = 0;
 
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+  void _showPermissionDialog(String permissionName, Function onGranted) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: Text("Permission Required"),
+        content: Text("This app requires $permissionName permission."),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              noCount++;
+              if (noCount >= 3) {
+                noCount = 0;
+                openAppSettings(); // Open app settings for permanent denial
+              }
+            },
+            child: Text("No"),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              var status = await PermissionHandler().request(
+                Permission.contacts,
+              );
+              if (status == PermissionStatus.granted) {
+                onGranted();
+              } else if (status == PermissionStatus.permanentlyDenied) {
+                openAppSettings();
+              }
+            },
+            child: Text("Yes"),
+          ),
+        ],
       ),
-      home: Screen(),
     );
   }
-}
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  void contact() async {
+    var status = await Permission.contacts.status;
+    if (status.isGranted) {
+      Navigator.of(context).push(MaterialPageRoute(builder: (context) => ContactScreen()));
+    } else {
+      _showPermissionDialog("contact", () {
+        Navigator.of(context).push(MaterialPageRoute(builder: (context) => ContactScreen()));
+      });
+    }
+  }
 
-  final String title;
+  void camera() async {
+    var status = await Permission.camera.status;
+    if (status.isGranted) {
+      // Add camera screen navigation logic here
+    } else {
+      _showPermissionDialog("camera", () {
+        // Add camera screen navigation logic here
+      });
+    }
+  }
 
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
+  void location() async {
+    var status = await Permission.location.status;
+    if (status.isGranted) {
+      // Add location screen navigation logic here
+    } else {
+      _showPermissionDialog("location", () {
+        // Add location screen navigation logic here
+      });
+    }
+  }
 
-class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
+      appBar: AppBar(title: Text("Screen")),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(onPressed: contact, child: Text("Contact")),
+            ElevatedButton(onPressed: camera, child: Text("Camera")),
+            ElevatedButton(onPressed: location, child: Text("Location")),
+          ],
+        ),
       ),
-      // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
