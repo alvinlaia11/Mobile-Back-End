@@ -15,7 +15,8 @@ class Screen extends StatefulWidget {
 class _ScreenState extends State<Screen> {
   int noCount = 0;
 
-  void _showPermissionDialog(String permissionName, Function onGranted) {
+  void _showPermissionDialog(
+      String permissionName, Function onGranted, Function onDenied) {
     showDialog(
       context: context,
       builder: (BuildContext context) => AlertDialog(
@@ -28,7 +29,9 @@ class _ScreenState extends State<Screen> {
               noCount++;
               if (noCount >= 3) {
                 noCount = 0;
-                openAppSettings(); // Open app settings for permanent denial
+                _showSettingsDialog(); // Show settings dialog for permanent denial
+              } else {
+                onDenied();
               }
             },
             child: Text("No"),
@@ -40,7 +43,9 @@ class _ScreenState extends State<Screen> {
               if (status == PermissionStatus.granted) {
                 onGranted();
               } else if (status == PermissionStatus.permanentlyDenied) {
-                openAppSettings();
+                _showSettingsDialog(); // Show settings dialog for permanent denial
+              } else {
+                onDenied();
               }
             },
             child: Text("Yes"),
@@ -50,36 +55,82 @@ class _ScreenState extends State<Screen> {
     );
   }
 
+  void _showSettingsDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: Text("Permission Denied"),
+        content: Text(
+          "You have denied the permission multiple times. "
+          "Please go to app settings to grant the permission.",
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              openAppSettings();
+            },
+            child: Text("Open Settings"),
+          ),
+        ],
+      ),
+    );
+  }
+
   void contact() async {
     var status = await Permission.contacts.status;
     if (status.isGranted) {
-      Navigator.of(context).push(MaterialPageRoute(builder: (context) => ContactScreen()));
+      Navigator.of(context)
+          .push(MaterialPageRoute(builder: (context) => ContactScreen()));
     } else {
-      _showPermissionDialog("contact", () {
-        Navigator.of(context).push(MaterialPageRoute(builder: (context) => ContactScreen()));
-      });
+      _showPermissionDialog(
+        "contact",
+        () {
+          Navigator.of(context)
+              .push(MaterialPageRoute(builder: (context) => ContactScreen()));
+        },
+        () {
+          // Handle denial or "No" here
+        },
+      );
     }
   }
 
   void camera() async {
     var status = await Permission.camera.status;
     if (status.isGranted) {
-      Navigator.of(context).push(MaterialPageRoute(builder: (context) => CameraScreen()));
+      Navigator.of(context)
+          .push(MaterialPageRoute(builder: (context) => CameraScreen()));
     } else {
-      _showPermissionDialog("camera", () {
-        Navigator.of(context).push(MaterialPageRoute(builder: (context) => CameraScreen()));
-      });
+      _showPermissionDialog(
+        "camera",
+        () {
+          Navigator.of(context)
+              .push(MaterialPageRoute(builder: (context) => CameraScreen()));
+        },
+        () {
+          // Handle denial or "No" here
+        },
+      );
     }
   }
 
   void location() async {
     var status = await Permission.location.status;
     if (status.isGranted) {
-      Navigator.of(context).push(MaterialPageRoute(builder: (context) => LocationScreen()));
+      Navigator.of(context)
+          .push(MaterialPageRoute(builder: (context) => LocationScreen()));
     } else {
-      _showPermissionDialog("location", () {
-        Navigator.of(context).push(MaterialPageRoute(builder: (context) => LocationScreen()));
-      });
+      _showPermissionDialog(
+        "location",
+        () {
+          Navigator.of(context)
+              .push(MaterialPageRoute(builder: (context) => LocationScreen()));
+        },
+        () {
+          // Handle denial or "No" here
+        },
+      );
     }
   }
 
