@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'contact.dart';
+import 'camera.dart';
+import 'location.dart';
 
 class Screen extends StatefulWidget {
-  const Screen({super.key});
+  const Screen({Key? key}) : super(key: key);
 
   @override
   State<Screen> createState() => _ScreenState();
@@ -34,9 +36,7 @@ class _ScreenState extends State<Screen> {
           TextButton(
             onPressed: () async {
               Navigator.of(context).pop();
-              var status = await PermissionHandler().request(
-                Permission.contacts,
-              );
+              var status = await Permission.contacts.request();
               if (status == PermissionStatus.granted) {
                 onGranted();
               } else if (status == PermissionStatus.permanentlyDenied) {
@@ -64,10 +64,10 @@ class _ScreenState extends State<Screen> {
   void camera() async {
     var status = await Permission.camera.status;
     if (status.isGranted) {
-      // Add camera screen navigation logic here
+      Navigator.of(context).push(MaterialPageRoute(builder: (context) => CameraScreen()));
     } else {
       _showPermissionDialog("camera", () {
-        // Add camera screen navigation logic here
+        Navigator.of(context).push(MaterialPageRoute(builder: (context) => CameraScreen()));
       });
     }
   }
@@ -75,10 +75,10 @@ class _ScreenState extends State<Screen> {
   void location() async {
     var status = await Permission.location.status;
     if (status.isGranted) {
-      // Add location screen navigation logic here
+      Navigator.of(context).push(MaterialPageRoute(builder: (context) => LocationScreen()));
     } else {
       _showPermissionDialog("location", () {
-        // Add location screen navigation logic here
+        Navigator.of(context).push(MaterialPageRoute(builder: (context) => LocationScreen()));
       });
     }
   }
