@@ -46,6 +46,7 @@ class _ScreenState extends State<Screen> {
               if (status == PermissionStatus.granted) {
                 onGranted();
               } else if (status == PermissionStatus.permanentlyDenied) {
+                rejectionCounts[permission] = 0;
                 _showSettingsDialog(); // Show settings dialog for permanent denial
               } else {
                 rejectionCounts[permission] = count + 1;
@@ -95,7 +96,8 @@ class _ScreenState extends State<Screen> {
   }
 
   void contact() async {
-    var status = await Permission.contacts.status;
+    var permission = Permission.contacts;
+    var status = await permission.status;
     if (status.isGranted) {
       Navigator.of(context)
           .push(MaterialPageRoute(builder: (context) => ContactScreen()));
@@ -114,7 +116,8 @@ class _ScreenState extends State<Screen> {
   }
 
   void camera() async {
-    var status = await Permission.camera.status;
+    var permission = Permission.camera;
+    var status = await permission.status;
     if (status.isGranted) {
       Navigator.of(context)
           .push(MaterialPageRoute(builder: (context) => CameraScreen()));
@@ -133,7 +136,8 @@ class _ScreenState extends State<Screen> {
   }
 
   void location() async {
-    var status = await Permission.location.status;
+    var permission = Permission.location;
+    var status = await permission.status;
     if (status.isGranted) {
       Navigator.of(context)
           .push(MaterialPageRoute(builder: (context) => LocationScreen()));
