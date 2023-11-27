@@ -13,13 +13,10 @@ class Screen extends StatefulWidget {
 }
 
 class _ScreenState extends State<Screen> {
-  Map<Permission, int> rejectionCounts = {};
+  int noCount = 0;
 
   void _showPermissionDialog(
       String permissionName, Function onGranted, Function onDenied) {
-    var permission = _getPermissionType(permissionName);
-    var count = rejectionCounts[permission] ?? 0;
-
     showDialog(
       context: context,
       builder: (BuildContext context) => AlertDialog(
@@ -29,11 +26,11 @@ class _ScreenState extends State<Screen> {
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              if (count >= 2) {
-                rejectionCounts[permission] = 0;
+              noCount++;
+              if (noCount >= 3) {
+                noCount = 0;
                 _showSettingsDialog(); // Show settings dialog for permanent denial
               } else {
-                rejectionCounts[permission] = count + 1;
                 onDenied();
               }
             },
@@ -42,14 +39,12 @@ class _ScreenState extends State<Screen> {
           TextButton(
             onPressed: () async {
               Navigator.of(context).pop();
-              var status = await permission.request();
+              var status = await Permission.camera.request();
               if (status == PermissionStatus.granted) {
                 onGranted();
               } else if (status == PermissionStatus.permanentlyDenied) {
-                rejectionCounts[permission] = 0;
-                _showSettingsDialog(); // Show settings dialog for permanent denial
+                _openAppSettings(); // Open app settings for permanent denial
               } else {
-                rejectionCounts[permission] = count + 1;
                 onDenied();
               }
             },
@@ -73,31 +68,20 @@ class _ScreenState extends State<Screen> {
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              openAppSettings();
             },
-            child: Text("Open Settings"),
+            child: Text("OK"),
           ),
         ],
       ),
     );
   }
 
-  Permission _getPermissionType(String permissionName) {
-    switch (permissionName) {
-      case "contact":
-        return Permission.contacts;
-      case "camera":
-        return Permission.camera;
-      case "location":
-        return Permission.location;
-      default:
-        throw ArgumentError("Invalid permission name: $permissionName");
-    }
+  void _openAppSettings() async {
+    await openAppSettings();
   }
 
   void contact() async {
-    var permission = Permission.contacts;
-    var status = await permission.status;
+    var status = await Permission.contacts.status;
     if (status.isGranted) {
       Navigator.of(context)
           .push(MaterialPageRoute(builder: (context) => ContactScreen()));
@@ -116,8 +100,7 @@ class _ScreenState extends State<Screen> {
   }
 
   void camera() async {
-    var permission = Permission.camera;
-    var status = await permission.status;
+    var status = await Permission.camera.status;
     if (status.isGranted) {
       Navigator.of(context)
           .push(MaterialPageRoute(builder: (context) => CameraScreen()));
@@ -136,8 +119,7 @@ class _ScreenState extends State<Screen> {
   }
 
   void location() async {
-    var permission = Permission.location;
-    var status = await permission.status;
+    var status = await Permission.location.status;
     if (status.isGranted) {
       Navigator.of(context)
           .push(MaterialPageRoute(builder: (context) => LocationScreen()));
