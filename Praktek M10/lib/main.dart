@@ -14,6 +14,7 @@ class Screen extends StatefulWidget {
 
 class _ScreenState extends State<Screen> {
   int noCount = 0;
+  bool shouldOpenSettingsDirectly = false;
 
   void _showPermissionDialog(
       String permissionName, Function onGranted, Function onDenied) {
@@ -29,7 +30,8 @@ class _ScreenState extends State<Screen> {
               noCount++;
               if (noCount >= 3) {
                 noCount = 0;
-                _openAppSettings(); // Open app settings for permanent denial
+                shouldOpenSettingsDirectly = true;
+                Navigator.pop(context); // Close the current screen
               } else {
                 onDenied();
               }
@@ -43,7 +45,9 @@ class _ScreenState extends State<Screen> {
               if (status == PermissionStatus.granted) {
                 onGranted();
               } else if (status == PermissionStatus.permanentlyDenied) {
-                _openAppSettings(); // Open app settings for permanent denial
+                noCount = 0; // Reset the count when permission is permanently denied
+                shouldOpenSettingsDirectly = true;
+                Navigator.pop(context); // Close the current screen
               } else {
                 onDenied();
               }
@@ -59,27 +63,30 @@ class _ScreenState extends State<Screen> {
     await openAppSettings();
   }
 
+  void _handlePermission() {
+    if (shouldOpenSettingsDirectly) {
+      _openAppSettings();
+    } else {
+      // Handle the permission logic if needed
+    }
+  }
+
   void contact() async {
     var status = await Permission.contacts.status;
     if (status.isGranted) {
       Navigator.of(context)
           .push(MaterialPageRoute(builder: (context) => ContactScreen()));
     } else {
-      if (noCount >= 3) {
-        noCount = 0;
-        _openAppSettings(); // Open app settings for permanent denial
-      } else {
-        _showPermissionDialog(
-          "contact",
-          () {
-            Navigator.of(context)
-                .push(MaterialPageRoute(builder: (context) => ContactScreen()));
-          },
-          () {
-            // Handle denial or "No" here
-          },
-        );
-      }
+      _showPermissionDialog(
+        "contact",
+        () {
+          Navigator.of(context)
+              .push(MaterialPageRoute(builder: (context) => ContactScreen()));
+        },
+        () {
+          _handlePermission();
+        },
+      );
     }
   }
 
@@ -89,21 +96,16 @@ class _ScreenState extends State<Screen> {
       Navigator.of(context)
           .push(MaterialPageRoute(builder: (context) => CameraScreen()));
     } else {
-      if (noCount >= 3) {
-        noCount = 0;
-        _openAppSettings(); // Open app settings for permanent denial
-      } else {
-        _showPermissionDialog(
-          "camera",
-          () {
-            Navigator.of(context)
-                .push(MaterialPageRoute(builder: (context) => CameraScreen()));
-          },
-          () {
-            // Handle denial or "No" here
-          },
-        );
-      }
+      _showPermissionDialog(
+        "camera",
+        () {
+          Navigator.of(context)
+              .push(MaterialPageRoute(builder: (context) => CameraScreen()));
+        },
+        () {
+          _handlePermission();
+        },
+      );
     }
   }
 
@@ -113,21 +115,16 @@ class _ScreenState extends State<Screen> {
       Navigator.of(context)
           .push(MaterialPageRoute(builder: (context) => LocationScreen()));
     } else {
-      if (noCount >= 3) {
-        noCount = 0;
-        _openAppSettings(); // Open app settings for permanent denial
-      } else {
-        _showPermissionDialog(
-          "location",
-          () {
-            Navigator.of(context)
-                .push(MaterialPageRoute(builder: (context) => LocationScreen()));
-          },
-          () {
-            // Handle denial or "No" here
-          },
-        );
-      }
+      _showPermissionDialog(
+        "location",
+        () {
+          Navigator.of(context)
+              .push(MaterialPageRoute(builder: (context) => LocationScreen()));
+        },
+        () {
+          _handlePermission();
+        },
+      );
     }
   }
 
