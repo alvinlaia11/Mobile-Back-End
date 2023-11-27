@@ -29,7 +29,7 @@ class _ScreenState extends State<Screen> {
               noCount++;
               if (noCount >= 3) {
                 noCount = 0;
-                _showSettingsDialog(); // Show settings dialog for permanent denial
+                _openAppSettings(); // Open app settings for permanent denial
               } else {
                 onDenied();
               }
@@ -55,27 +55,6 @@ class _ScreenState extends State<Screen> {
     );
   }
 
-  void _showSettingsDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: Text("Permission Denied"),
-        content: Text(
-          "You have denied the permission multiple times. "
-          "Please go to app settings to grant the permission.",
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: Text("OK"),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _openAppSettings() async {
     await openAppSettings();
   }
@@ -86,16 +65,21 @@ class _ScreenState extends State<Screen> {
       Navigator.of(context)
           .push(MaterialPageRoute(builder: (context) => ContactScreen()));
     } else {
-      _showPermissionDialog(
-        "contact",
-        () {
-          Navigator.of(context)
-              .push(MaterialPageRoute(builder: (context) => ContactScreen()));
-        },
-        () {
-          // Handle denial or "No" here
-        },
-      );
+      if (noCount >= 3) {
+        noCount = 0;
+        _openAppSettings(); // Open app settings for permanent denial
+      } else {
+        _showPermissionDialog(
+          "contact",
+          () {
+            Navigator.of(context)
+                .push(MaterialPageRoute(builder: (context) => ContactScreen()));
+          },
+          () {
+            // Handle denial or "No" here
+          },
+        );
+      }
     }
   }
 
@@ -105,16 +89,21 @@ class _ScreenState extends State<Screen> {
       Navigator.of(context)
           .push(MaterialPageRoute(builder: (context) => CameraScreen()));
     } else {
-      _showPermissionDialog(
-        "camera",
-        () {
-          Navigator.of(context)
-              .push(MaterialPageRoute(builder: (context) => CameraScreen()));
-        },
-        () {
-          // Handle denial or "No" here
-        },
-      );
+      if (noCount >= 3) {
+        noCount = 0;
+        _openAppSettings(); // Open app settings for permanent denial
+      } else {
+        _showPermissionDialog(
+          "camera",
+          () {
+            Navigator.of(context)
+                .push(MaterialPageRoute(builder: (context) => CameraScreen()));
+          },
+          () {
+            // Handle denial or "No" here
+          },
+        );
+      }
     }
   }
 
@@ -124,16 +113,21 @@ class _ScreenState extends State<Screen> {
       Navigator.of(context)
           .push(MaterialPageRoute(builder: (context) => LocationScreen()));
     } else {
-      _showPermissionDialog(
-        "location",
-        () {
-          Navigator.of(context)
-              .push(MaterialPageRoute(builder: (context) => LocationScreen()));
-        },
-        () {
-          // Handle denial or "No" here
-        },
-      );
+      if (noCount >= 3) {
+        noCount = 0;
+        _openAppSettings(); // Open app settings for permanent denial
+      } else {
+        _showPermissionDialog(
+          "location",
+          () {
+            Navigator.of(context)
+                .push(MaterialPageRoute(builder: (context) => LocationScreen()));
+          },
+          () {
+            // Handle denial or "No" here
+          },
+        );
+      }
     }
   }
 
